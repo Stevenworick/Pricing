@@ -28,7 +28,6 @@ class BlackScholesMerton(object):
         """ Docstring """
         price = np.exp(-self.r * self.t) * (self.k * stats.norm.cdf(-self._d2) - (
                     self.s * np.exp((self.r - self.q) * self.t) * stats.norm.cdf(-self._d1)))
-
         return price
 
     def call_delta(self):
@@ -78,7 +77,6 @@ class GeometricBrownianMotion(BlackScholesMerton):
         self.steps = configuration.steps
         self.st_paths = np.zeros((self.simulation, self.steps))
         self.prices_at_maturity = None
-        GeometricBrownianMotion.run_simulation(self)
 
     def run_simulation(self):
         """ Docstring """
@@ -112,9 +110,8 @@ class Heston(GeometricBrownianMotion):
         self._rr = configuration.rate_reversion
         self._vv = configuration.sigma_sigma
         self._corr = configuration.correlation
-        Heston.run_simulation(self)
         
-    def run_simulations(self):
+    def run_simulation(self):
         """ Docstring """
         delta_t = self.t / float(self.steps)
         for i in range(self.simulation):

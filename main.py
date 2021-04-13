@@ -1,7 +1,6 @@
 """ main """
-
-from configuration import ConfigurationBuilder
 from pricing import BlackScholesMerton, GeometricBrownianMotion, Heston
+from configuration import ConfigurationBuilder
 
 configuration_obj = ConfigurationBuilder(
 
@@ -25,8 +24,12 @@ configuration_obj = ConfigurationBuilder(
 )
 
 bsm_pricing = BlackScholesMerton(configuration_obj)
+
 gbm_pricing = GeometricBrownianMotion(configuration_obj)
+gbm_pricing.run_simulation()
+
 heston_pricing = Heston(configuration_obj)
+heston_pricing.run_simulation()
 
 print("call")
 print(bsm_pricing.call_price())
@@ -40,11 +43,12 @@ print(heston_pricing.put_price())
 
 """
 In[2]:
+call
 9.94764496602258
-10.089992268159822
-9.96097452176407
+10.090981528256577
+2.3511986201121142
 put
 9.94764496602258
-9.925691552994227
-9.876303619009215
+9.966650183954462
+29.61329599783158
 """
