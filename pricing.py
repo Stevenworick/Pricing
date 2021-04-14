@@ -6,9 +6,10 @@ from configuration import ConfigurationBuilder
 
 class BlackScholesMerton(object):
     """ Black Scholes Merton Pricing """
-    PERIODS_PER_YEAR = 252
+    PERIODS_PER_YEAR = 365
 
     def __init__(self, configuration: ConfigurationBuilder):
+        self.configuration = configuration
         self.s = configuration.spot
         self.k = configuration.strike
         self.v = configuration.sigma
@@ -97,6 +98,18 @@ class GeometricBrownianMotion(BlackScholesMerton):
     def put_price(self):
         """ Docstring """
         payoffs = [max(self.k - S, 0) for S in self.prices_at_maturity]
+        payoff = np.mean(payoffs)
+        return payoff * np.exp(-self.r * self.t)
+
+    def call_up_out(self, barrier):
+        """ Docstring """
+        payoffs = [(S < barrier) * max(S - self.k, 0) for S in self.prices_at_maturity]
+        payoff = np.mean(payoffs)
+        return payoff * np.exp(-self.r * self.t)
+
+    def put_down_out(self, barrier):
+        """ Docstring """
+        payoffs = [(S > barrier) * max(self.k - S, 0) for S in self.prices_at_maturity]
         payoff = np.mean(payoffs)
         return payoff * np.exp(-self.r * self.t)
 
