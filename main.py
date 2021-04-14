@@ -25,14 +25,15 @@ configuration_obj = ConfigurationBuilder(
 configuration_obj.strike = 1000
 option_1 = BlackScholesMerton(configuration_obj)
 
-configuration_obj.strike = 2000
+configuration_obj.strike = 1100
 option_2 = BlackScholesMerton(configuration_obj)
 
-strategy = option_1 + option_2
+strategy = option_1 * 2
 
 print(option_1.call_price())
 print(option_2.call_price())
 print(strategy.call_price())
+print(strategy.call_delta())
 
 
 

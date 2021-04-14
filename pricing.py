@@ -137,7 +137,7 @@ class BlackScholesMerton(object):
         return 1/self.PERIODS_PER_YEAR * theta
 
     def __add__(self, other):
-
+        """ Docstring """
         return Option(
             self.call_price() + other.call_price(),
             self.put_price() + other.put_price(),
@@ -149,6 +149,36 @@ class BlackScholesMerton(object):
             self.put_rho() + other.put_rho(),
             self.call_theta() + other.call_theta(),
             self.put_theta() + other.put_theta()
+        )
+
+    def __sub__(self, other):
+        """ Docstring """
+        return Option(
+            self.call_price() - other.call_price(),
+            self.put_price() - other.put_price(),
+            self.call_delta() - other.call_delta(),
+            self.put_delta() - other.put_delta(),
+            self.gamma() - other.gamma(),
+            self.vega() - other.vega(),
+            self.call_rho() - other.call_rho(),
+            self.put_rho() - other.put_rho(),
+            self.call_theta() - other.call_theta(),
+            self.put_theta() - other.put_theta()
+        )
+
+    def __mul__(self, other):
+        """ Docstring """
+        return Option(
+            self.call_price() * other,
+            self.put_price() * other,
+            self.call_delta() * other,
+            self.put_delta() * other,
+            self.gamma() * other,
+            self.vega() * other,
+            self.call_rho() * other,
+            self.put_rho() * other,
+            self.call_theta() * other,
+            self.put_theta() * other
         )
 
 
@@ -205,7 +235,7 @@ class Heston(GeometricBrownianMotion):
         self._rr = configuration.rate_reversion
         self._vv = configuration.sigma_sigma
         self._corr = configuration.correlation
-        
+
     def run_simulation(self):
         """ Docstring """
         delta_t = self.t / float(self.steps)
