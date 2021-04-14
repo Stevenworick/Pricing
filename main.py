@@ -5,8 +5,8 @@ from configuration import ConfigurationBuilder
 configuration_obj = ConfigurationBuilder(
 
     # Common Parameters
-    spot=4140.0,
-    strike=4140.0,
+    spot=1000.0,
+    strike=1000.0,
     sigma=0.20,
     maturity=365,
     risk_free_rate=0,
@@ -22,8 +22,25 @@ configuration_obj = ConfigurationBuilder(
     sigma_sigma=1.10,
     correlation=-0.7
 )
+configuration_obj.strike = 1000
+option_1 = BlackScholesMerton(configuration_obj)
+
+configuration_obj.strike = 2000
+option_2 = BlackScholesMerton(configuration_obj)
+
+strategy = option_1 + option_2
+
+print(option_1.call_price())
+print(option_2.call_price())
+print(strategy.call_price())
 
 
+
+
+
+
+"""
 gmb_pricing = GeometricBrownianMotion(configuration_obj)
 gmb_pricing.run_simulation()
 print(gmb_pricing.call_up_out(barrier=4818))
+"""

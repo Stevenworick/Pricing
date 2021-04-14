@@ -4,6 +4,73 @@ import scipy.stats as stats
 from configuration import ConfigurationBuilder
 
 
+class Option(object):
+    """ Option object """
+    def __init__(
+            self,
+            call_price: float,
+            put_price: float,
+            call_delta: float,
+            put_delta: float,
+            gamma: float,
+            vega: float,
+            call_rho: float,
+            put_rho: float,
+            call_theta: float,
+            put_theta: float
+    ):
+        self._call_price = call_price
+        self._put_price = put_price
+        self._call_delta = call_delta
+        self._put_delta = put_delta
+        self._gamma = gamma
+        self._vega = vega
+        self._call_rho = call_rho
+        self._put_rho = put_rho
+        self._call_theta = call_theta
+        self._put_theta = put_theta
+
+    def call_price(self):
+        """ Docstring """
+        return self._call_price
+
+    def put_price(self):
+        """ Docstring """
+        return self._put_price
+
+    def call_delta(self):
+        """ Docstring """
+        return self._call_delta
+
+    def put_delta(self):
+        """ Docstring """
+        return self._put_delta
+
+    def gamma(self):
+        """ Docstring """
+        return self._gamma
+
+    def vega(self):
+        """ Docstring """
+        return self._vega
+
+    def call_rho(self):
+        """ Docstring """
+        return self._call_rho
+
+    def put_rho(self):
+        """ Docstring """
+        return self._put_rho
+
+    def call_theta(self):
+        """ Docstring """
+        return self._call_theta
+
+    def put_theta(self):
+        """ Docstring """
+        return self._put_theta
+
+
 class BlackScholesMerton(object):
     """ Black Scholes Merton Pricing """
     PERIODS_PER_YEAR = 365
@@ -68,6 +135,21 @@ class BlackScholesMerton(object):
                 + self.q * self.s * stats.norm.cdf(-self._d1) * np.exp(-self.q * self.t) \
                 - self.r * self.k * np.exp(-self.r * self.t) * stats.norm.cdf(-self._d2)
         return 1/self.PERIODS_PER_YEAR * theta
+
+    def __add__(self, other):
+
+        return Option(
+            self.call_price() + other.call_price(),
+            self.put_price() + other.put_price(),
+            self.call_delta() + other.call_delta(),
+            self.put_delta() + other.put_delta(),
+            self.gamma() + other.gamma(),
+            self.vega() + other.vega(),
+            self.call_rho() + other.call_rho(),
+            self.put_rho() + other.put_rho(),
+            self.call_theta() + other.call_theta(),
+            self.put_theta() + other.put_theta()
+        )
 
 
 class GeometricBrownianMotion(BlackScholesMerton):
