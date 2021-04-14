@@ -8,16 +8,16 @@ class Option(object):
     """ Option object """
     def __init__(
             self,
-            call_price: float,
-            put_price: float,
-            call_delta: float,
-            put_delta: float,
-            gamma: float,
-            vega: float,
-            call_rho: float,
-            put_rho: float,
-            call_theta: float,
-            put_theta: float
+            call_price: float = None,
+            put_price: float = None,
+            call_delta: float = None,
+            put_delta: float = None,
+            gamma: float = None,
+            vega: float = None,
+            call_rho: float = None,
+            put_rho: float = None,
+            call_theta: float = None,
+            put_theta: float = None
     ):
         self._call_price = call_price
         self._put_price = put_price
@@ -70,13 +70,58 @@ class Option(object):
         """ Docstring """
         return self._put_theta
 
+    def __add__(self, other):
+        """ Docstring """
+        return Option(
+            self.call_price() + other.call_price(),
+            self.put_price() + other.put_price(),
+            self.call_delta() + other.call_delta(),
+            self.put_delta() + other.put_delta(),
+            self.gamma() + other.gamma(),
+            self.vega() + other.vega(),
+            self.call_rho() + other.call_rho(),
+            self.put_rho() + other.put_rho(),
+            self.call_theta() + other.call_theta(),
+            self.put_theta() + other.put_theta()
+        )
 
-class BlackScholesMerton(object):
+    def __sub__(self, other):
+        """ Docstring """
+        return Option(
+            self.call_price() - other.call_price(),
+            self.put_price() - other.put_price(),
+            self.call_delta() - other.call_delta(),
+            self.put_delta() - other.put_delta(),
+            self.gamma() - other.gamma(),
+            self.vega() - other.vega(),
+            self.call_rho() - other.call_rho(),
+            self.put_rho() - other.put_rho(),
+            self.call_theta() - other.call_theta(),
+            self.put_theta() - other.put_theta()
+        )
+
+    def __mul__(self, other):
+        """ Docstring """
+        return Option(
+            self.call_price() * other,
+            self.put_price() * other,
+            self.call_delta() * other,
+            self.put_delta() * other,
+            self.gamma() * other,
+            self.vega() * other,
+            self.call_rho() * other,
+            self.put_rho() * other,
+            self.call_theta() * other,
+            self.put_theta() * other
+        )
+
+
+class BlackScholesMerton(Option):
     """ Black Scholes Merton Pricing """
     PERIODS_PER_YEAR = 365
 
     def __init__(self, configuration: ConfigurationBuilder):
-        self.configuration = configuration
+        super(BlackScholesMerton, self).__init__()
         self.s = configuration.spot
         self.k = configuration.strike
         self.v = configuration.sigma
@@ -135,51 +180,6 @@ class BlackScholesMerton(object):
                 + self.q * self.s * stats.norm.cdf(-self._d1) * np.exp(-self.q * self.t) \
                 - self.r * self.k * np.exp(-self.r * self.t) * stats.norm.cdf(-self._d2)
         return 1/self.PERIODS_PER_YEAR * theta
-
-    def __add__(self, other):
-        """ Docstring """
-        return Option(
-            self.call_price() + other.call_price(),
-            self.put_price() + other.put_price(),
-            self.call_delta() + other.call_delta(),
-            self.put_delta() + other.put_delta(),
-            self.gamma() + other.gamma(),
-            self.vega() + other.vega(),
-            self.call_rho() + other.call_rho(),
-            self.put_rho() + other.put_rho(),
-            self.call_theta() + other.call_theta(),
-            self.put_theta() + other.put_theta()
-        )
-
-    def __sub__(self, other):
-        """ Docstring """
-        return Option(
-            self.call_price() - other.call_price(),
-            self.put_price() - other.put_price(),
-            self.call_delta() - other.call_delta(),
-            self.put_delta() - other.put_delta(),
-            self.gamma() - other.gamma(),
-            self.vega() - other.vega(),
-            self.call_rho() - other.call_rho(),
-            self.put_rho() - other.put_rho(),
-            self.call_theta() - other.call_theta(),
-            self.put_theta() - other.put_theta()
-        )
-
-    def __mul__(self, other):
-        """ Docstring """
-        return Option(
-            self.call_price() * other,
-            self.put_price() * other,
-            self.call_delta() * other,
-            self.put_delta() * other,
-            self.gamma() * other,
-            self.vega() * other,
-            self.call_rho() * other,
-            self.put_rho() * other,
-            self.call_theta() * other,
-            self.put_theta() * other
-        )
 
 
 class GeometricBrownianMotion(BlackScholesMerton):

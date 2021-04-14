@@ -22,21 +22,21 @@ configuration_obj = ConfigurationBuilder(
     sigma_sigma=1.10,
     correlation=-0.7
 )
+
 configuration_obj.strike = 1000
 option_1 = BlackScholesMerton(configuration_obj)
 
 configuration_obj.strike = 1100
 option_2 = BlackScholesMerton(configuration_obj)
 
-strategy = option_1 * 2
+configuration_obj.strike = 1200
+option_3 = BlackScholesMerton(configuration_obj)
 
-print(option_1.call_price())
-print(option_2.call_price())
-print(strategy.call_price())
+q = (1100-1000)/(1200-1100)
+
+strategy = option_1 - option_2 * (q + 1) + option_3 * q
+
 print(strategy.call_delta())
-
-
-
 
 
 
