@@ -21,7 +21,7 @@ configuration.strike = barrier
 option_2 = BlackScholesMerton(configuration)
 
 # :::: Buy :::: OTM :::: Call :::: Shift @ 1
-shift = int(barrier * 0.03)
+shift = 1  # int(barrier * 0.03)
 configuration.strike = barrier + shift
 option_3 = BlackScholesMerton(configuration)
 
