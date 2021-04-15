@@ -174,6 +174,12 @@ class GeometricBrownianMotion(BlackScholesMerton):
         payoff = np.mean(payoffs)
         return payoff * np.exp(-self.r * self.t)
 
+    def digital(self):
+        """ average of discounted payoffs """
+        payoffs = [S > self.k for S in self.prices_at_maturity]
+        payoff = np.mean(payoffs)
+        return payoff * np.exp(-self.r * self.t)
+
     def call_up_out(self, barrier):
         """ average of discounted payoffs """
         payoffs = [(S < barrier) * max(S - self.k, 0) for S in self.prices_at_maturity]
