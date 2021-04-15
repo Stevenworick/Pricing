@@ -45,7 +45,7 @@ Result with shift @ 1
 0.0008433991543687069
 0.0014979259688452373
 
-Result with shift @ 0.0001
+Result with shift @ 0.001
 0.5825870460103033
 0.0070055752839834895
 -0.0006294851178267891
@@ -56,11 +56,12 @@ Result with shift @ 0.0001
 
 # :::: Montecarlo for comparison
 configuration.strike = configuration.spot
-configuration.simulation = 20000
+configuration.simulation = 40000
 configuration.steps = 365
 gbm_pricing = GeometricBrownianMotion(configuration)
 gbm_pricing.run_simulation()
 print(gbm_pricing.call_up_out(barrier=barrier))
 """
+Result with Montecarlo
 0.5858203229501271
 """
