@@ -3,10 +3,12 @@
 
 class ConfigurationBuilder(object):
     """ configuration object """
-    def __init__(self, spot: float, strike: float, sigma: float, maturity: int, risk_free_rate: float,
-                 dividend_yield: float, lt_sigma: float = None, rate_reversion: float = None,
-                 sigma_sigma: float = None, correlation: float = None, simulation: int = None, steps: int = None):
+    def __init__(self, kind: str = None, spot: float = None, strike: float = None, sigma: float = None,
+                 maturity: int = None, risk_free_rate: float = None, dividend_yield: float = None,
+                 lt_sigma: float = None, rate_reversion: float = None, sigma_sigma: float = None,
+                 correlation: float = None, simulation: int = None, steps: int = None):
         """
+        :param kind: should be 'call' or 'put'
         :param spot: current price
         :param strike: exercise price
         :param sigma: current volatility
@@ -20,6 +22,7 @@ class ConfigurationBuilder(object):
         :param simulation: number of montecarlo simulation
         :param steps: number of steps in each simulation
         """
+        self._kind = kind
         self._spot = spot
         self._strike = strike
         self._sigma = sigma
@@ -32,6 +35,16 @@ class ConfigurationBuilder(object):
         self._correlation = correlation
         self._simulation = simulation
         self._steps = steps
+
+    @property
+    def kind(self):
+        """ getter """
+        return self._kind
+
+    @kind.setter
+    def kind(self, _kind):
+        """ setter """
+        self._kind = _kind
 
     @property
     def spot(self):

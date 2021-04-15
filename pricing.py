@@ -6,45 +6,22 @@ from configuration import ConfigurationBuilder
 
 class Option(object):
     """ Option object """
-    def __init__(
-            self,
-            call_price: float = None,
-            put_price: float = None,
-            call_delta: float = None,
-            put_delta: float = None,
-            gamma: float = None,
-            vega: float = None,
-            call_rho: float = None,
-            put_rho: float = None,
-            call_theta: float = None,
-            put_theta: float = None
-    ):
-        self._call_price = call_price
-        self._put_price = put_price
-        self._call_delta = call_delta
-        self._put_delta = put_delta
+    def __init__(self, price: float = None, delta: float = None, gamma: float = None, vega: float = None,
+                 theta: float = None, rho: float = None):
+        self._price = price
+        self._delta = delta
         self._gamma = gamma
         self._vega = vega
-        self._call_rho = call_rho
-        self._put_rho = put_rho
-        self._call_theta = call_theta
-        self._put_theta = put_theta
+        self._theta = theta
+        self._rho = rho
 
-    def call_price(self):
+    def price(self):
         """ Docstring """
-        return self._call_price
+        return self._price
 
-    def put_price(self):
+    def delta(self):
         """ Docstring """
-        return self._put_price
-
-    def call_delta(self):
-        """ Docstring """
-        return self._call_delta
-
-    def put_delta(self):
-        """ Docstring """
-        return self._put_delta
+        return self._delta
 
     def gamma(self):
         """ Docstring """
@@ -54,65 +31,45 @@ class Option(object):
         """ Docstring """
         return self._vega
 
-    def call_rho(self):
+    def theta(self):
         """ Docstring """
-        return self._call_rho
+        return self._theta
 
-    def put_rho(self):
+    def rho(self):
         """ Docstring """
-        return self._put_rho
-
-    def call_theta(self):
-        """ Docstring """
-        return self._call_theta
-
-    def put_theta(self):
-        """ Docstring """
-        return self._put_theta
+        return self._rho
 
     def __add__(self, other):
         """ Docstring """
         return Option(
-            self.call_price() + other.call_price(),
-            self.put_price() + other.put_price(),
-            self.call_delta() + other.call_delta(),
-            self.put_delta() + other.put_delta(),
+            self.price() + other.price(),
+            self.delta() + other.delta(),
             self.gamma() + other.gamma(),
             self.vega() + other.vega(),
-            self.call_rho() + other.call_rho(),
-            self.put_rho() + other.put_rho(),
-            self.call_theta() + other.call_theta(),
-            self.put_theta() + other.put_theta()
+            self.theta() + other.theta(),
+            self.rho() + other.rho()
         )
 
     def __sub__(self, other):
         """ Docstring """
         return Option(
-            self.call_price() - other.call_price(),
-            self.put_price() - other.put_price(),
-            self.call_delta() - other.call_delta(),
-            self.put_delta() - other.put_delta(),
+            self.price() - other.price(),
+            self.delta() - other.delta(),
             self.gamma() - other.gamma(),
             self.vega() - other.vega(),
-            self.call_rho() - other.call_rho(),
-            self.put_rho() - other.put_rho(),
-            self.call_theta() - other.call_theta(),
-            self.put_theta() - other.put_theta()
+            self.theta() - other.theta(),
+            self.rho() - other.rho()
         )
 
     def __mul__(self, other):
         """ Docstring """
         return Option(
-            self.call_price() * other,
-            self.put_price() * other,
-            self.call_delta() * other,
-            self.put_delta() * other,
+            self.price() * other,
+            self.delta() * other,
             self.gamma() * other,
             self.vega() * other,
-            self.call_rho() * other,
-            self.put_rho() * other,
-            self.call_theta() * other,
-            self.put_theta() * other
+            self.theta() * other,
+            self.rho() * other
         )
 
 
@@ -122,6 +79,7 @@ class BlackScholesMerton(Option):
 
     def __init__(self, configuration: ConfigurationBuilder):
         super(BlackScholesMerton, self).__init__()
+        self.kind = configuration.kind
         self.s = configuration.spot
         self.k = configuration.strike
         self.v = configuration.sigma
@@ -131,25 +89,27 @@ class BlackScholesMerton(Option):
         self._d1 = (np.log(self.s / self.k) + (self.r + self.v ** 2 / 2.0) * self.t) / self.v * np.sqrt(self.t)
         self._d2 = self._d1 - self.v * np.sqrt(self.t)
 
-    def call_price(self):
+    def price(self):
         """ Docstring """
-        price = np.exp(-self.r * self.t) * (self.s * np.exp((self.r - self.q) * self.t) * stats.norm.cdf(
-            self._d1) - self.k * stats.norm.cdf(self._d2))
-        return price
-
-    def put_price(self):
-        """ Docstring """
-        price = np.exp(-self.r * self.t) * (self.k * stats.norm.cdf(-self._d2) - (
+        if self.kind == 'call':
+            price = np.exp(-self.r * self.t) * (self.s * np.exp((self.r - self.q) * self.t) * stats.norm.cdf(
+                self._d1) - self.k * stats.norm.cdf(self._d2))
+        elif self.kind == 'put':
+            price = np.exp(-self.r * self.t) * (self.k * stats.norm.cdf(-self._d2) - (
                     self.s * np.exp((self.r - self.q) * self.t) * stats.norm.cdf(-self._d1)))
+        else:
+            raise ValueError
         return price
 
-    def call_delta(self):
+    def delta(self):
         """ Docstring """
-        return np.exp(-self.q * self.t) * stats.norm.cdf(self._d1)
-
-    def put_delta(self):
-        """ Docstring """
-        return np.exp(-self.q * self.t) * stats.norm.cdf(self._d1) - 1
+        if self.kind == 'call':
+            delta = np.exp(-self.q * self.t) * stats.norm.cdf(self._d1)
+        elif self.kind == "put":
+            delta = np.exp(-self.q * self.t) * stats.norm.cdf(self._d1) - 1
+        else:
+            raise ValueError
+        return delta
 
     def gamma(self):
         """ Docstring """
@@ -159,33 +119,35 @@ class BlackScholesMerton(Option):
         """ Docstring """
         return 0.01 * (self.s * np.sqrt(self.t) * stats.norm.pdf(self._d1) * np.exp(-self.q * self.t))
 
-    def call_rho(self):
+    def rho(self):
         """ Docstring """
-        return 0.01 * (self.k * self.t * (np.exp(-self.r * self.t)) * stats.norm.cdf(self._d2))
+        if self.kind == 'call':
+            rho = 0.01 * (self.k * self.t * (np.exp(-self.r * self.t)) * stats.norm.cdf(self._d2))
+        elif self.kind == "put":
+            rho = 0.01 * (-self.k * self.t * (np.exp(-self.r * self.t)) * stats.norm.cdf(-self._d2))
+        else:
+            raise ValueError
+        return rho
 
-    def put_rho(self):
+    def theta(self):
         """ Docstring """
-        return 0.01 * (-self.k * self.t * (np.exp(-self.r * self.t)) * stats.norm.cdf(-self._d2))
-
-    def call_theta(self):
-        """ Docstring """
-        theta = -self.s * stats.norm.pdf(self._d1) * self.v * np.exp(-self.q * self.t) / (2 * np.sqrt(self.t)) \
-                + self.q * self.s * stats.norm.cdf(self._d1) * np.exp(-self.q * self.t) \
-                - self.r * self.k * np.exp(-self.r * self.t) * stats.norm.cdf(self._d2)
-        return 1/self.PERIODS_PER_YEAR * theta
-
-    def put_theta(self):
-        """ Docstring """
-        theta = -self.s * stats.norm.pdf(self._d1) * self.v * np.exp(-self.q * self.t) / (2 * np.sqrt(self.t)) \
-                + self.q * self.s * stats.norm.cdf(-self._d1) * np.exp(-self.q * self.t) \
-                - self.r * self.k * np.exp(-self.r * self.t) * stats.norm.cdf(-self._d2)
+        if self.kind == 'call':
+            theta = -self.s * stats.norm.pdf(self._d1) * self.v * np.exp(-self.q * self.t) / (2 * np.sqrt(self.t)) \
+                    + self.q * self.s * stats.norm.cdf(self._d1) * np.exp(-self.q * self.t) \
+                    - self.r * self.k * np.exp(-self.r * self.t) * stats.norm.cdf(self._d2)
+        elif self.kind == "put":
+            theta = -self.s * stats.norm.pdf(self._d1) * self.v * np.exp(-self.q * self.t) / (2 * np.sqrt(self.t)) \
+                    + self.q * self.s * stats.norm.cdf(-self._d1) * np.exp(-self.q * self.t) \
+                    - self.r * self.k * np.exp(-self.r * self.t) * stats.norm.cdf(-self._d2)
+        else:
+            raise ValueError
         return 1/self.PERIODS_PER_YEAR * theta
 
 
 class GeometricBrownianMotion(BlackScholesMerton):
     """ Docstring """
     def __init__(self, configuration: ConfigurationBuilder):
-        super().__init__(configuration)
+        super(GeometricBrownianMotion, self).__init__(configuration)
         self.simulation = configuration.simulation
         self.steps = configuration.steps
         self.st_paths = np.zeros((self.simulation, self.steps))
@@ -201,15 +163,14 @@ class GeometricBrownianMotion(BlackScholesMerton):
                         1 / self.PERIODS_PER_YEAR) * np.random.normal(0, 1))
         self.prices_at_maturity = [self.st_paths[i][-1] for i in range(self.simulation)]
 
-    def call_price(self):
+    def price(self):
         """ Docstring """
-        payoffs = [max(S - self.k, 0) for S in self.prices_at_maturity]
-        payoff = np.mean(payoffs)
-        return payoff * np.exp(-self.r * self.t)
-
-    def put_price(self):
-        """ Docstring """
-        payoffs = [max(self.k - S, 0) for S in self.prices_at_maturity]
+        if self.kind == 'call':
+            payoffs = [max(S - self.k, 0) for S in self.prices_at_maturity]
+        elif self.kind == 'put':
+            payoffs = [max(self.k - S, 0) for S in self.prices_at_maturity]
+        else:
+            raise ValueError
         payoff = np.mean(payoffs)
         return payoff * np.exp(-self.r * self.t)
 
