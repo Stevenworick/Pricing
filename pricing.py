@@ -1,6 +1,7 @@
 """ pricing module """
 import numpy as np
 import scipy.stats as stats
+from math import log, sqrt, exp
 from configuration import ConfigurationBuilder
 
 
@@ -86,17 +87,17 @@ class BlackScholesMerton(Option):
         self.t = configuration.maturity / self.PERIODS_PER_YEAR
         self.r = configuration.risk_free_rate
         self.q = configuration.dividend_yield
-        self._d1 = (np.log(self.s / self.k) + (self.r + self.v ** 2 / 2.0) * self.t) / self.v * np.sqrt(self.t)
-        self._d2 = self._d1 - self.v * np.sqrt(self.t)
+        self._d1 = (log(self.s / self.k) + (self.r - self.q + self.v ** 2 * 0.5) * self.t) / (self.v * sqrt(self.t))
+        self._d2 = (log(self.s / self.k) + (self.r - self.q - self.v ** 2 * 0.5) * self.t) / (self.v * sqrt(self.t))
 
     def price(self):
         """ Premium, composed of the sum of the intrinsic and time value """
         if self.kind == 'call':
-            price = np.exp(-self.r * self.t) * (self.s * np.exp((self.r - self.q) * self.t) * stats.norm.cdf(
+            price = exp(-self.r * self.t) * (self.s * exp((self.r - self.q) * self.t) * stats.norm.cdf(
                 self._d1) - self.k * stats.norm.cdf(self._d2))
         elif self.kind == 'put':
-            price = np.exp(-self.r * self.t) * (self.k * stats.norm.cdf(-self._d2) - (
-                    self.s * np.exp((self.r - self.q) * self.t) * stats.norm.cdf(-self._d1)))
+            price = exp(-self.r * self.t) * (self.k * stats.norm.cdf(-self._d2) - (
+                    self.s * exp((self.r - self.q) * self.t) * stats.norm.cdf(-self._d1)))
         else:
             raise ValueError
         return price
@@ -104,31 +105,31 @@ class BlackScholesMerton(Option):
     def delta(self):
         """ first derivative of the value of the option with respect to the underlying security's price """
         if self.kind == 'call':
-            delta = np.exp(-self.q * self.t) * stats.norm.cdf(self._d1)
+            delta = exp(-self.q * self.t) * stats.norm.cdf(self._d1)
         elif self.kind == "put":
-            delta = np.exp(-self.q * self.t) * stats.norm.cdf(self._d1) - 1
+            delta = exp(-self.q * self.t) * stats.norm.cdf(self._d1) - 1
         else:
             raise ValueError
         return delta
 
     def gamma(self):
         """ second derivative of the value of the option with respect to the underlying security's price """
-        return stats.norm.pdf(self._d1) * np.exp(-self.q * self.t) / (self.s * self.v * np.sqrt(self.t))
+        return stats.norm.pdf(self._d1) * exp(-self.q * self.t) / (self.s * self.v * sqrt(self.t))
 
     def vega(self):
         """ first derivative of the value of the option with respect to the underlying security's volatility """
-        return 0.01 * (self.s * np.sqrt(self.t) * stats.norm.pdf(self._d1) * np.exp(-self.q * self.t))
+        return 0.01 * (self.s * sqrt(self.t) * stats.norm.pdf(self._d1) * exp(-self.q * self.t))
 
     def theta(self):
         """ first derivative of the value of the option with respect to the time """
         if self.kind == 'call':
-            theta = -self.s * stats.norm.pdf(self._d1) * self.v * np.exp(-self.q * self.t) / (2 * np.sqrt(self.t)) \
-                    + self.q * self.s * stats.norm.cdf(self._d1) * np.exp(-self.q * self.t) \
-                    - self.r * self.k * np.exp(-self.r * self.t) * stats.norm.cdf(self._d2)
+            theta = -self.s * stats.norm.pdf(self._d1) * self.v * exp(-self.q * self.t) / (2 * sqrt(self.t)) \
+                    + self.q * self.s * stats.norm.cdf(self._d1) * exp(-self.q * self.t) \
+                    - self.r * self.k * exp(-self.r * self.t) * stats.norm.cdf(self._d2)
         elif self.kind == "put":
-            theta = -self.s * stats.norm.pdf(self._d1) * self.v * np.exp(-self.q * self.t) / (2 * np.sqrt(self.t)) \
-                    + self.q * self.s * stats.norm.cdf(-self._d1) * np.exp(-self.q * self.t) \
-                    - self.r * self.k * np.exp(-self.r * self.t) * stats.norm.cdf(-self._d2)
+            theta = -self.s * stats.norm.pdf(self._d1) * self.v * exp(-self.q * self.t) / (2 * sqrt(self.t)) \
+                    + self.q * self.s * stats.norm.cdf(-self._d1) * exp(-self.q * self.t) \
+                    - self.r * self.k * exp(-self.r * self.t) * stats.norm.cdf(-self._d2)
         else:
             raise ValueError
         return 1/self.PERIODS_PER_YEAR * theta
@@ -136,9 +137,9 @@ class BlackScholesMerton(Option):
     def rho(self):
         """ first derivative of the value of the option with respect to the interest rate """
         if self.kind == 'call':
-            rho = 0.01 * (self.k * self.t * (np.exp(-self.r * self.t)) * stats.norm.cdf(self._d2))
+            rho = 0.01 * (self.k * self.t * (exp(-self.r * self.t)) * stats.norm.cdf(self._d2))
         elif self.kind == "put":
-            rho = 0.01 * (-self.k * self.t * (np.exp(-self.r * self.t)) * stats.norm.cdf(-self._d2))
+            rho = 0.01 * (-self.k * self.t * (exp(-self.r * self.t)) * stats.norm.cdf(-self._d2))
         else:
             raise ValueError
         return rho
@@ -158,8 +159,8 @@ class GeometricBrownianMotion(BlackScholesMerton):
         for i in range(self.simulation):
             self.st_paths[i][0] = self.s
             for j in range(1, self.steps):
-                self.st_paths[i][j] = self.st_paths[i][j-1] * np.exp(
-                    (self.r - 0.5 * self.v**2) * 1 / self.PERIODS_PER_YEAR + self.v * np.sqrt(
+                self.st_paths[i][j] = self.st_paths[i][j-1] * exp(
+                    (self.r - 0.5 * self.v**2) * 1 / self.PERIODS_PER_YEAR + self.v * sqrt(
                         1 / self.PERIODS_PER_YEAR) * np.random.normal(0, 1))
         self.prices_at_maturity = [self.st_paths[i][-1] for i in range(self.simulation)]
 
@@ -172,37 +173,37 @@ class GeometricBrownianMotion(BlackScholesMerton):
         else:
             raise ValueError
         payoff = np.mean(payoffs)
-        return payoff * np.exp(-self.r * self.t)
+        return payoff * exp(-self.r * self.t)
 
     def digital(self):
         """ average of discounted payoffs """
         payoffs = [S > self.k for S in self.prices_at_maturity]
         payoff = np.mean(payoffs)
-        return payoff * np.exp(-self.r * self.t)
+        return payoff * exp(-self.r * self.t)
 
     def call_up_out(self, barrier):
         """ average of discounted payoffs """
         payoffs = [(S < barrier) * max(S - self.k, 0) for S in self.prices_at_maturity]
         payoff = np.mean(payoffs)
-        return payoff * np.exp(-self.r * self.t)
+        return payoff * exp(-self.r * self.t)
 
     def call_up_in(self, barrier):
         """ average of discounted payoffs """
         payoffs = [(S > barrier) * max(S - self.k, 0) for S in self.prices_at_maturity]
         payoff = np.mean(payoffs)
-        return payoff * np.exp(-self.r * self.t)
+        return payoff * exp(-self.r * self.t)
 
     def put_down_out(self, barrier):
         """ average of discounted payoffs """
         payoffs = [(S > barrier) * max(self.k - S, 0) for S in self.prices_at_maturity]
         payoff = np.mean(payoffs)
-        return payoff * np.exp(-self.r * self.t)
+        return payoff * exp(-self.r * self.t)
 
     def put_down_in(self, barrier):
         """ average of discounted payoffs """
         payoffs = [(S < barrier) * max(self.k - S, 0) for S in self.prices_at_maturity]
         payoff = np.mean(payoffs)
-        return payoff * np.exp(-self.r * self.t)
+        return payoff * exp(-self.r * self.t)
 
 
 class Heston(GeometricBrownianMotion):
@@ -224,11 +225,11 @@ class Heston(GeometricBrownianMotion):
             self.st_paths[i][0] = self.s
             for j in range(1, self.steps):
                 w1 = np.random.normal(0, 1)
-                w2 = self._corr * w1 + np.sqrt(1 - self._corr ** 2) * np.random.normal(0, 1)
+                w2 = self._corr * w1 + sqrt(1 - self._corr ** 2) * np.random.normal(0, 1)
 
-                vt = (np.sqrt(max(0, vt)) + 0.5 * self._vv * np.sqrt(delta_t) * w1) ** 2 - self._rr * (
+                vt = (sqrt(max(0, vt)) + 0.5 * self._vv * sqrt(delta_t) * w1) ** 2 - self._rr * (
                             vt - self._lt_v) * delta_t - 0.25 * self._vv ** 2 * delta_t
 
-                st = st * np.exp((self.r - self.q - 0.5 * vt) * delta_t + np.sqrt(max(0, vt) * delta_t) * w2)
+                st *= exp((self.r - self.q - 0.5 * vt) * delta_t + sqrt(max(0, vt) * delta_t) * w2)
                 self.st_paths[i][j] = st
         self.prices_at_maturity = [self.st_paths[i][-1] for i in range(self.simulation)]
