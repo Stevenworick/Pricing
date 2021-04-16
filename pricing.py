@@ -205,6 +205,18 @@ class GeometricBrownianMotion(BlackScholesMerton):
         payoff = np.mean(payoffs)
         return payoff * exp(-self.r * self.t)
 
+    def put_knock_in(self, barrier):
+        """ average of discounted payoffs """
+        payoffs = []
+        for path in self.st_paths:
+            if np.min(path) < barrier:
+                payoffs.append(max(self.k - path[-1], 0))
+            else:
+                payoffs.append(0)
+
+        payoff = np.mean(payoffs)
+        return payoff * exp(-self.r * self.t)
+
 
 class Heston(GeometricBrownianMotion):
     """ Stochastic Volatility Pricing """

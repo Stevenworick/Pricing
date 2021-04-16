@@ -3,9 +3,9 @@ from pricing import BlackScholesMerton, GeometricBrownianMotion
 from configuration import ConfigurationBuilder
 
 configuration = ConfigurationBuilder(
-    kind='call',
+    kind='put',
     spot=100.0,
-    sigma=0.30,
+    sigma=0.20,
     maturity=365,
     risk_free_rate=0,
     dividend_yield=0,
@@ -61,6 +61,7 @@ configuration.steps = 365
 gbm_pricing = GeometricBrownianMotion(configuration)
 gbm_pricing.run_simulation()
 print(gbm_pricing.call_up_out(barrier=barrier))
+
 """
 Result with Montecarlo
 0.5858203229501271
