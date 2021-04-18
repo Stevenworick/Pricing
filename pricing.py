@@ -76,7 +76,7 @@ class Option(object):
 
 class BlackScholesMerton(Option):
     """ Black Scholes Merton Pricing """
-    PERIODS_PER_YEAR = 365
+    PERIODS_PER_YEAR = 252
 
     def __init__(self, configuration: ConfigurationBuilder):
         super(BlackScholesMerton, self).__init__()
