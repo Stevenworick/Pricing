@@ -2,7 +2,7 @@
 import numpy as np
 import scipy.stats as stats
 from math import log, sqrt, exp
-from configuration import ConfigurationBuilder
+from configuration import OptionConfigurationBuilder
 
 
 class Option(object):
@@ -78,7 +78,7 @@ class BlackScholesMerton(Option):
     """ Black Scholes Merton Pricing """
     PERIODS_PER_YEAR = 252
 
-    def __init__(self, configuration: ConfigurationBuilder):
+    def __init__(self, configuration: OptionConfigurationBuilder):
         super(BlackScholesMerton, self).__init__()
         self.kind = configuration.kind
         self.s = configuration.spot
@@ -147,7 +147,7 @@ class BlackScholesMerton(Option):
 
 class GeometricBrownianMotion(BlackScholesMerton):
     """ Continuous-time stochastic process """
-    def __init__(self, configuration: ConfigurationBuilder):
+    def __init__(self, configuration: OptionConfigurationBuilder):
         super(GeometricBrownianMotion, self).__init__(configuration)
         self.simulation = configuration.simulation
         self.steps = configuration.steps
@@ -216,32 +216,3 @@ class GeometricBrownianMotion(BlackScholesMerton):
 
         payoff = np.mean(payoffs)
         return payoff * exp(-self.r * self.t)
-
-
-class Heston(GeometricBrownianMotion):
-    """ Stochastic Volatility Pricing """
-
-    def __init__(self, configuration: ConfigurationBuilder):
-        super(Heston, self).__init__(configuration)
-        self._lt_v = configuration.lt_sigma
-        self._rr = configuration.rate_reversion
-        self._vv = configuration.sigma_sigma
-        self._corr = configuration.correlation
-
-    def run_simulation(self):
-        """ time series computation """
-        delta_t = self.t / float(self.steps)
-        for i in range(self.simulation):
-            vt = self.v
-            st = self.s
-            self.st_paths[i][0] = self.s
-            for j in range(1, self.steps):
-                w1 = np.random.normal(0, 1)
-                w2 = self._corr * w1 + sqrt(1 - self._corr ** 2) * np.random.normal(0, 1)
-
-                vt = (sqrt(max(0, vt)) + 0.5 * self._vv * sqrt(delta_t) * w1) ** 2 - self._rr * (
-                            vt - self._lt_v) * delta_t - 0.25 * self._vv ** 2 * delta_t
-
-                st *= exp((self.r - self.q - 0.5 * vt) * delta_t + sqrt(max(0, vt) * delta_t) * w2)
-                self.st_paths[i][j] = st
-        self.prices_at_maturity = [self.st_paths[i][-1] for i in range(self.simulation)]

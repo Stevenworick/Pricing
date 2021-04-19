@@ -1,12 +1,11 @@
 """ configuration object """
 
 
-class ConfigurationBuilder(object):
+class OptionConfigurationBuilder(object):
     """ configuration object """
     def __init__(self, kind: str = None, spot: float = None, strike: float = None, sigma: float = None,
                  maturity: int = None, risk_free_rate: float = None, dividend_yield: float = None,
-                 lt_sigma: float = None, rate_reversion: float = None, sigma_sigma: float = None,
-                 correlation: float = None, simulation: int = None, steps: int = None):
+                 simulation: int = None, steps: int = None):
         """
         :param kind: should be 'call' or 'put'
         :param spot: current price
@@ -15,10 +14,6 @@ class ConfigurationBuilder(object):
         :param maturity: number of day until expiration
         :param risk_free_rate: theoretical rate of return of an investment with zero risk
         :param dividend_yield: financial ratio (dividend/price)
-        :param lt_sigma: long term average of price volatility
-        :param rate_reversion: mean reversion rate for the volatility
-        :param sigma_sigma: the volatility of volatility
-        :param correlation: correlation between the standard normal random variables W1 and W2
         :param simulation: number of montecarlo simulation
         :param steps: number of steps in each simulation
         """
@@ -29,10 +24,6 @@ class ConfigurationBuilder(object):
         self._maturity = maturity
         self._risk_free_rate = risk_free_rate
         self._dividend_yield = dividend_yield
-        self._lt_sigma = lt_sigma
-        self._rate_reversion = rate_reversion
-        self._sigma_sigma = sigma_sigma
-        self._correlation = correlation
         self._simulation = simulation
         self._steps = steps
 
@@ -105,46 +96,6 @@ class ConfigurationBuilder(object):
     def dividend_yield(self, _dividend_yield):
         """ setter """
         self._dividend_yield = _dividend_yield
-
-    @property
-    def lt_sigma(self):
-        """ getter """
-        return self._lt_sigma
-
-    @lt_sigma.setter
-    def lt_sigma(self, _lt_sigma):
-        """ setter """
-        self._lt_sigma = _lt_sigma
-
-    @property
-    def rate_reversion(self):
-        """ getter """
-        return self._rate_reversion
-
-    @rate_reversion.setter
-    def rate_reversion(self, _rate_reversion):
-        """ setter """
-        self._rate_reversion = _rate_reversion
-
-    @property
-    def sigma_sigma(self):
-        """ getter """
-        return self._sigma_sigma
-
-    @sigma_sigma.setter
-    def sigma_sigma(self, _sigma_sigma):
-        """ setter """
-        self._sigma_sigma = _sigma_sigma
-
-    @property
-    def correlation(self):
-        """ getter """
-        return self._correlation
-
-    @correlation.setter
-    def correlation(self, _correlation):
-        """ setter """
-        self._correlation = _correlation
 
     @property
     def simulation(self):
