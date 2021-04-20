@@ -30,89 +30,125 @@ class OptionConfigurationBuilder(object):
     @property
     def kind(self):
         """ getter """
+        if self._kind not in ['call', 'put']:
+            raise ValueError('kind should be call or put')
         return self._kind
 
     @kind.setter
     def kind(self, _kind):
         """ setter """
+        if _kind not in ['call', 'put']:
+            raise ValueError('kind should be call or put')
         self._kind = _kind
 
     @property
     def spot(self):
         """ getter """
+        if not isinstance(self._spot, (float, int)):
+            raise ValueError('spot should be a float or a integer')
         return self._spot
 
     @spot.setter
     def spot(self, _spot):
         """ setter """
+        if not isinstance(_spot, (float, int)):
+            raise ValueError('spot should be a float or a integer')
         self._spot = _spot
 
     @property
     def strike(self):
         """ getter """
+        if not isinstance(self._strike, (float, int)):
+            raise ValueError('strike should be a float or a integer')
         return self._strike
 
     @strike.setter
     def strike(self, _strike):
         """ setter """
+        if not isinstance(_strike, (float, int)):
+            raise ValueError('strike should be a float or a integer')
         self._strike = _strike
 
     @property
     def sigma(self):
         """ getter """
+        if not isinstance(self._sigma, (float, int)):
+            raise ValueError('sigma should be a float or a integer')
         return self._sigma
 
     @sigma.setter
     def sigma(self, _sigma):
         """ setter """
+        if not isinstance(_sigma, (float, int)):
+            raise ValueError('sigma should be a float or a integer')
         self._sigma = _sigma
 
     @property
     def maturity(self):
         """ getter """
+        if not isinstance(self._maturity, int):
+            raise ValueError('maturity should be a integer')
         return self._maturity
 
     @maturity.setter
     def maturity(self, _maturity):
         """ setter """
+        if not isinstance(_maturity, int):
+            raise ValueError('maturity should be a integer')
         self._maturity = _maturity
 
     @property
     def risk_free_rate(self):
         """ getter """
+        if not isinstance(self._risk_free_rate, (int, float)):
+            raise ValueError('risk_free_rate should be a float or a integer')
         return self._risk_free_rate
 
     @risk_free_rate.setter
     def risk_free_rate(self, _risk_free_rate):
         """ setter """
+        if not isinstance(_risk_free_rate, (int, float)):
+            raise ValueError('risk_free_rate should be a float or a integer')
         self._risk_free_rate = _risk_free_rate
 
     @property
     def dividend_yield(self):
         """ getter """
+        if not isinstance(self._dividend_yield, (int, float)):
+            raise ValueError('dividend_yield should be a float or a integer')
         return self._dividend_yield
 
     @dividend_yield.setter
     def dividend_yield(self, _dividend_yield):
         """ setter """
+        if not isinstance(_dividend_yield, (int, float)):
+            raise ValueError('dividend_yield should be a float or a integer')
         self._dividend_yield = _dividend_yield
 
     @property
     def simulation(self):
         """ getter """
+        if not isinstance(self._simulation, int):
+            raise ValueError('simulation should be a integer')
         return self._simulation
 
     @simulation.setter
     def simulation(self, _simulation):
         """ setter """
+        if not isinstance(_simulation, int):
+            raise ValueError('simulation should be a integer')
         self._simulation = _simulation
 
     @property
     def steps(self):
         """ getter """
+        if not isinstance(self._steps, int):
+            raise ValueError('steps should be a integer')
         return self._steps
 
     @steps.setter
     def steps(self, _steps):
         """ setter """
+        if not isinstance(_steps, int):
+            raise ValueError('steps should be a integer')
         self._steps = _steps

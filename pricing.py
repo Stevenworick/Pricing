@@ -95,21 +95,17 @@ class BlackScholesMerton(Option):
         if self.kind == 'call':
             price = exp(-self.r * self.t) * (self.s * exp((self.r - self.q) * self.t) * stats.norm.cdf(
                 self._d1) - self.k * stats.norm.cdf(self._d2))
-        elif self.kind == 'put':
+        else:
             price = exp(-self.r * self.t) * (self.k * stats.norm.cdf(-self._d2) - (
                     self.s * exp((self.r - self.q) * self.t) * stats.norm.cdf(-self._d1)))
-        else:
-            raise ValueError
         return price
 
     def delta(self):
         """ first derivative of the value of the option with respect to the underlying security's price """
         if self.kind == 'call':
             delta = exp(-self.q * self.t) * stats.norm.cdf(self._d1)
-        elif self.kind == "put":
-            delta = exp(-self.q * self.t) * stats.norm.cdf(self._d1) - 1
         else:
-            raise ValueError
+            delta = exp(-self.q * self.t) * stats.norm.cdf(self._d1) - 1
         return delta
 
     def gamma(self):
@@ -126,22 +122,18 @@ class BlackScholesMerton(Option):
             theta = -self.s * stats.norm.pdf(self._d1) * self.v * exp(-self.q * self.t) / (2 * sqrt(self.t)) \
                     + self.q * self.s * stats.norm.cdf(self._d1) * exp(-self.q * self.t) \
                     - self.r * self.k * exp(-self.r * self.t) * stats.norm.cdf(self._d2)
-        elif self.kind == "put":
+        else:
             theta = -self.s * stats.norm.pdf(self._d1) * self.v * exp(-self.q * self.t) / (2 * sqrt(self.t)) \
                     + self.q * self.s * stats.norm.cdf(-self._d1) * exp(-self.q * self.t) \
                     - self.r * self.k * exp(-self.r * self.t) * stats.norm.cdf(-self._d2)
-        else:
-            raise ValueError
         return 1/self.PERIODS_PER_YEAR * theta
 
     def rho(self):
         """ first derivative of the value of the option with respect to the interest rate """
         if self.kind == 'call':
             rho = 0.01 * (self.k * self.t * (exp(-self.r * self.t)) * stats.norm.cdf(self._d2))
-        elif self.kind == "put":
-            rho = 0.01 * (-self.k * self.t * (exp(-self.r * self.t)) * stats.norm.cdf(-self._d2))
         else:
-            raise ValueError
+            rho = 0.01 * (-self.k * self.t * (exp(-self.r * self.t)) * stats.norm.cdf(-self._d2))
         return rho
 
 
@@ -168,10 +160,8 @@ class GeometricBrownianMotion(BlackScholesMerton):
         """ average of discounted payoffs """
         if self.kind == 'call':
             payoffs = [max(S - self.k, 0) for S in self.prices_at_maturity]
-        elif self.kind == 'put':
-            payoffs = [max(self.k - S, 0) for S in self.prices_at_maturity]
         else:
-            raise ValueError
+            payoffs = [max(self.k - S, 0) for S in self.prices_at_maturity]
         payoff = np.mean(payoffs)
         return payoff * exp(-self.r * self.t)
 
@@ -202,17 +192,5 @@ class GeometricBrownianMotion(BlackScholesMerton):
     def put_down_in(self, barrier):
         """ average of discounted payoffs """
         payoffs = [(S < barrier) * max(self.k - S, 0) for S in self.prices_at_maturity]
-        payoff = np.mean(payoffs)
-        return payoff * exp(-self.r * self.t)
-
-    def put_knock_in(self, barrier):
-        """ average of discounted payoffs """
-        payoffs = []
-        for path in self.st_paths:
-            if np.min(path) < barrier:
-                payoffs.append(max(self.k - path[-1], 0))
-            else:
-                payoffs.append(0)
-
         payoff = np.mean(payoffs)
         return payoff * exp(-self.r * self.t)
