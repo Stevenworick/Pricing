@@ -73,6 +73,9 @@ class Option(object):
             self.rho() * other
         )
 
+    def __hash__(self):
+        return hash((self.price(), self.gamma(), self.vega(), self.theta(), self.rho()))
+
 
 class BlackScholesMerton(Option):
     """ Black Scholes Merton Pricing """
@@ -145,6 +148,9 @@ class GeometricBrownianMotion(BlackScholesMerton):
         self.steps = configuration.steps
         self.st_paths = np.zeros((self.simulation, self.steps))
         self.prices_at_maturity = None
+        self.barrier = configuration.barrier
+
+        GeometricBrownianMotion.run_simulation(self)
 
     def run_simulation(self):
         """ time series computation """
@@ -171,25 +177,24 @@ class GeometricBrownianMotion(BlackScholesMerton):
         payoff = np.mean(payoffs)
         return payoff * exp(-self.r * self.t)
 
-    def call_up_out(self, barrier):
+    def up_and_out(self):
         """ average of discounted payoffs """
-        payoffs = [(S < barrier) * max(S - self.k, 0) for S in self.prices_at_maturity]
+        payoffs = [(S < self.barrier) * max(S - self.k, 0) for S in self.prices_at_maturity]
         payoff = np.mean(payoffs)
-        return payoff * exp(-self.r * self.t)
 
-    def call_up_in(self, barrier):
+    def up_and_in(self, barrier):
         """ average of discounted payoffs """
         payoffs = [(S > barrier) * max(S - self.k, 0) for S in self.prices_at_maturity]
         payoff = np.mean(payoffs)
         return payoff * exp(-self.r * self.t)
 
-    def put_down_out(self, barrier):
+    def down_and_out(self, barrier):
         """ average of discounted payoffs """
         payoffs = [(S > barrier) * max(self.k - S, 0) for S in self.prices_at_maturity]
         payoff = np.mean(payoffs)
         return payoff * exp(-self.r * self.t)
 
-    def put_down_in(self, barrier):
+    def down_and_in(self, barrier):
         """ average of discounted payoffs """
         payoffs = [(S < barrier) * max(self.k - S, 0) for S in self.prices_at_maturity]
         payoff = np.mean(payoffs)
